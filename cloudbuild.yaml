@@ -1,0 +1,40 @@
+# cloudbuild.yaml per il servizio Frontend (repository separata)
+
+steps:
+# 1. FRONTEND: Deploy su Cloud Run usando Buildpacks
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  id: 'deploy-frontend'
+  entrypoint: gcloud
+  args:
+    - 'run'
+    - 'deploy'
+    - 'azzurra-frontend' # Nome servizio Cloud Run
+    - '--source' # <-- QUESTO È IL FLAG CRUCIALE PER USARE I BUILDPACKS
+    - '.' # Contesto sorgente: la root di questa repo (dove package.json è)
+    - '--platform'
+    - 'managed'
+    - '--region'
+    - 'europe-west1'
+    - '--allow-unauthenticated'
+    - '--port'
+    - '8080'
+    - '--timeout'
+    - '900s' # Timeout esteso per SSR
+    - '--project'
+    - '${PROJECT_ID}'
+
+  env:
+    - 'GOOGLE_NODE_RUN_SCRIPTS=build:ssr,serve:ssr' # Esegui 'build:ssr' poi 'serve:ssr'
+
+# IMMAGINI da salvare in Artifact Registry (Non è necessario listare l'immagine del frontend qui per i Buildpacks)
+images:
+# Buildpacks gestiranno automaticamente il nome dell'immagine per te
+
+# Sostituzioni ENV (se il frontend ha bisogno di variabili d'ambiente)
+substitutions:
+  # _API_BACKEND_URL sarà l'URL del tuo backend deployato
+  _API_BACKEND_URL: 'https://azzurra-backend-1094999227512.europe-west1.run.app' # Sostituisci con l'URL reale del tuo backend
+
+# Opzioni di build per la gestione dei log
+options:
+  logging: CLOUD_LOGGING_ONLY
