@@ -1,0 +1,25 @@
+/* To learn more about this file see: https://angular.io/config/tsconfig. */
+{
+  "extends": "./tsconfig.json", // Estende il tsconfig.json principale della root del tuo progetto
+  "compilerOptions": {
+    "outDir": "./out-tsc/server", // Output corretto per la compilazione del server
+    "target": "es2022",           // Target moderno
+    "module": "es2022",           // Tipo di modulo corretto per Node.js moderno e bundler
+    "types": [
+      "node"                      // Necessario per il contesto Node.js
+    ],
+    "moduleResolution": "node"    // Importante per la risoluzione dei moduli in Node.js
+  },
+  "files": [
+    "server.ts",          // Il tuo server Express (che è nella root del progetto)
+    "src/main.server.ts"  // Il punto di ingresso dell'applicazione Angular per SSR (che è in src/)
+  ],
+  "include": [
+    "src/**/*.d.ts",
+    "src/**/*.ts"         // Include tutti i file TypeScript dalla cartella src
+  ],
+  "exclude": [
+    "src/test.ts",
+    "src/**/*.spec.ts"
+  ]
+}
