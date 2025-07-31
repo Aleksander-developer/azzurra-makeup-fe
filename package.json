@@ -5,13 +5,14 @@
   "type": "module",
   "scripts": {
     "ng": "ng",
-    "start": "node dist/server/main.js", 
+    "start": "node ./server/main.js", 
+    "build": "ng build --configuration=production --localize",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "prebuild:ssr": "rm -rf dist/",
-    "build:ssr": "ng build --configuration=production --localize && ng run azzurra-makeup-fe-new:server:production", 
-    "serve:ssr": "node dist/server/main.js", 
-    "serve:ssr:dev": "ng serve --hmr --open" 
+    "build:ssr": "ng build --configuration=production --localize && ng run azzurra-makeup-fe-new:server:production",
+    "serve:ssr": "node ./server/main.js", 
+    "serve:ssr:dev": "ng serve --hmr --open"
   },
   "dependencies": {
     "@angular/animations": "^18.2.0",

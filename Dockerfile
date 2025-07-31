@@ -1,38 +1,32 @@
 # Stage 1: Build the Angular application
 FROM node:20-bullseye AS builder 
 
-WORKDIR /app 
+WORKDIR /app
 
-# Copia package.json e package-lock.json (sono nella root di QUESTA REPO)
-COPY package.json package-lock.json ./ 
+# Copia package.json e package-lock.json
+COPY package.json package-lock.json ./
 
-# Pulisci la cache di npm per assicurare un'installazione fresca
+# Pulisci la cache di npm
 RUN npm cache clean --force 
 
-# Installa le dipendenze del progetto
+# Installa le dipendenze
 RUN npm install
 
-# Copia il resto dei file sorgente (dalla root del contesto a /app)
+# Copia il resto dei file sorgente
 COPY . .
 
-# Esegui la build del CLIENT (browser)
-RUN npx ng build --configuration=production --localize
-
-# Esegui la build del SERVER (SSR)
-# Assicurati che il nome del progetto qui sia azzurra-makeup-fe-new
-RUN npx ng run azzurra-makeup-fe-new:server:production 
+# Esegui la build SSR
+RUN npx ng build --configuration=production --localize && npx ng run azzurra-makeup-fe-new:server:production
 
 # Stage 2: Serve the application with a lightweight Node.js server
 FROM node:20-bullseye 
 
-WORKDIR /usr/src/app 
+WORKDIR /usr/src/app
 
-# Copia il contenuto della cartella 'dist/server' direttamente nella root del WORKDIR finale
-# Percorso: /app/dist/server/ (relativo a /app, dove Angular ha buildato)
+# Copia il contenuto della cartella 'dist/server' direttamente in ./server
 COPY --from=builder /app/dist/server/ ./server 
 
-# Copia il contenuto della cartella 'dist/browser' direttamente nella cartella 'browser' del WORKDIR finale
-# Percorso: /app/dist/browser/ (relativo a /app)
+# Copia il contenuto della cartella 'dist/browser' direttamente in ./browser
 COPY --from=builder /app/dist/browser/ ./browser 
 
 # Copia package.json e node_modules per il runtime
@@ -42,5 +36,5 @@ COPY --from=builder /app/node_modules ./node_modules/
 EXPOSE 8080
 
 # Comando per avviare l'applicazione
-# main.js è ora all'interno della cartella 'server' che è stata copiata
-CMD [ "node", "./server/main.js" ]
+# main.js si trova in /usr/src/app/server/main.js
+CMD [ "node", "./server/main.js" ] 
