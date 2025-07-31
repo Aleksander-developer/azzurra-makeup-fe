@@ -1,47 +1,32 @@
 # Stage 1: Build the Angular application
-FROM node:20-bullseye AS builder 
+FROM node:20 AS builder
 
-# Aggiunto: ARG per la variabile d'ambiente che verrà passata durante la build
-ARG API_BACKEND_URL="http://localhost:8080" 
-ENV API_BACKEND_URL=$API_BACKEND_URL 
+# Imposta la directory di lavoro principale per il progetto Angular
+WORKDIR /app/azzurra-makeup-fe
 
-WORKDIR /app 
-
-# Copia package.json e package-lock.json (sono nella root di QUESTA REPO)
-COPY package.json package-lock.json ./ 
-
-# Pulisci la cache di npm per assicurare un'installazione fresca
-RUN npm cache clean --force 
-
-# Installa le dipendenze del progetto
-RUN npm install
-
-# Copia il resto dei file sorgente (dalla root del contesto a /app)
+# Copia i file di configurazione essenziali
+COPY package.json package-lock.json ./
 COPY . .
 
-# Esegui la build del CLIENT (browser)
-RUN npx ng build --configuration=production --localize
+# Installa le dipendenze
+RUN npm ci
 
-# Esegui la build del SERVER (SSR)
-# Assicurati che il nome del progetto qui sia azzurra-makeup-fe-new
-RUN npx ng run azzurra-makeup-fe-new:server:production 
+# Esegui la build SSR
+RUN npx ng build --configuration=production --localize && npx ng run azzurra-makeup-fe:server:production
 
 # Stage 2: Serve the application with a lightweight Node.js server
-FROM node:20-bullseye 
+FROM node:20
 
-WORKDIR /usr/src/app 
+WORKDIR /usr/src/app
 
-# Copia il contenuto della cartella 'dist/server' direttamente nella root del WORKDIR finale
-COPY --from=builder /app/dist/server/ ./server 
+# Copia i bundle compilati
+COPY --from=builder /app/dist/azzurra-makeup-fe/server/ ./server
+COPY --from=builder /app/dist/azzurra-makeup-fe/browser/ ./browser
 
-# Copia il contenuto della cartella 'dist/browser' direttamente nella cartella 'browser' del WORKDIR finale
-COPY --from=builder /app/dist/browser/ ./browser 
-
-# Copia package.json e node_modules per il runtime
+# Copia i file per il runtime
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/node_modules ./node_modules/
 
 EXPOSE 8080
 
-# Comando per avviare l'applicazione
 CMD [ "node", "./server/main.js" ]
