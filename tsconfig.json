@@ -3,6 +3,7 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "baseUrl": "./", 
     "outDir": "./dist/out-tsc",
     "strict": true,
     "noImplicitOverride": true,
@@ -23,7 +24,7 @@
       "ES2022",
       "dom"
     ],
-    "paths": { 
+    "paths": {
       "@angular/localize/init": [
         "node_modules/@angular/localize/init"
       ]
