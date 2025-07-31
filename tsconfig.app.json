@@ -7,7 +7,9 @@
     "types": [] // Rimuovi "node" e "@angular/localize" da qui
   },
   "files": [
-    "src/main.ts" // Solo l'entry point principale del browser
+    "src/main.ts",
+    "src/main.server.ts",
+    "server.ts"
   ],
   "include": [
     "src/**/*.d.ts"
