@@ -3,7 +3,7 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "baseUrl": "./", 
+    "baseUrl": "./", // Indispensabile per i percorsi relativi
     "outDir": "./dist/out-tsc",
     "strict": true,
     "noImplicitOverride": true,
@@ -23,12 +23,8 @@
     "lib": [
       "ES2022",
       "dom"
-    ],
-    "paths": {
-      "@angular/localize/init": [
-        "node_modules/@angular/localize/init"
-      ]
-    }
+    ]
+    // RIMOSSO COMPLETAMENTE LA SEZIONE "paths"
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
