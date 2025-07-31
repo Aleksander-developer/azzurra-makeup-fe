@@ -8,8 +8,4 @@ if (environment.production) {
   enableProdMode();
 }
 
-// Export nominato per Express (renderModule)
 export { AppServerModule };
-
-// Export default per Vite SSR in dev
-export default AppServerModule;

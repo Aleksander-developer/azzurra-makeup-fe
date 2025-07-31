@@ -1,57 +1,62 @@
-// server.ts (nella ROOT del progetto)
+// server.ts
 import { APP_BASE_HREF } from '@angular/common';
 import { CommonEngine } from '@angular/ssr';
 import express from 'express';
 import { join } from 'node:path';
-import { LOCALE_ID } from '@angular/core';
+import { LOCALE_ID, enableProdMode } from '@angular/core';
+import '@angular/localize/init';
+
+// ✅ Importa environment senza errori
+let production = false;
+try {
+  const env = await import('./src/environments/environment');
+  // @ts-expect-error: TypeScript non riconosce .production, ma è presente
+  production = env.production ?? false;
+  if (production) {
+    enableProdMode();
+  }
+} catch (e) {
+  console.warn('⚠️ Ambiente di sviluppo: environment non caricato');
+}
 
 export async function app(): Promise<express.Express> {
   const server = express();
 
-  const mainServerBundle = await import('./src/main.server');
-  const AppServerModule = mainServerBundle.AppServerModule; 
+  // ✅ Import dinamico modulare con compatibilità .mjs
+
+  const AppServerModule = production
+    ? (await import('./server/main.mjs')).AppServerModule
+    : (await import('./src/main.server')).AppServerModule;
 
   const currentDir = process.cwd();
-  const browserDistFolder = join(currentDir, 'browser');
-  const serverDistFolder = join(currentDir, 'server');   
+  const browserDistFolder = join(currentDir, 'dist/browser');
   const backendApiUrl = process.env['API_BACKEND_URL'] || 'http://localhost:3000';
-
-  if (process.env['NODE_ENV'] !== 'production') {
-    console.log('📁 currentDir:', currentDir);
-    console.log('📁 serverDistFolder:', serverDistFolder);
-    console.log('📁 browserDistFolder:', browserDistFolder);
-    console.log('🔗 API_BACKEND_URL:', backendApiUrl);
-  }
 
   const supportedLocales = ['it', 'en'];
   const defaultLocale = 'it';
 
   const commonEngine = new CommonEngine();
-  server.set('view engine', 'html');
 
+  // Statici globali
   server.use(express.static(browserDistFolder, { maxAge: '1y' }));
 
-  // 🚀 Serve asset per ciascuna lingua
+  // Statici localizzati
   supportedLocales.forEach((locale) => {
     const localePath = join(browserDistFolder, locale);
     server.use(`/${locale}`, express.static(localePath, { maxAge: '1y' }));
   });
 
-  // 🎯 Servizio diretto del favicon
   server.get('/favicon.ico', (req, res) => {
     res.sendFile(join(browserDistFolder, 'favicon.ico'));
   });
 
-  // 🔁 Redirect dalla root alla lingua predefinita
   server.get('/', (req, res) => {
     res.redirect(`/${defaultLocale}`);
   });
 
-  // ⚠️ Catch-all e rendering SSR
-  server.get('*', async (req, res, next) => {
+  server.get('*', async (req, res) => {
     try {
-      // Determina la lingua basandosi sull'URL o usa la predefinita
-      const locale = req.url.startsWith(`/${supportedLocales[1]}`) ? supportedLocales[1] : defaultLocale;
+      const locale = req.url.startsWith('/en') ? 'en' : defaultLocale;
       const localePath = join(browserDistFolder, locale);
       const indexHtml = join(localePath, 'index.html');
 
@@ -63,25 +68,25 @@ export async function app(): Promise<express.Express> {
         providers: [
           { provide: APP_BASE_HREF, useValue: `/${locale}/` },
           { provide: LOCALE_ID, useValue: locale },
-          { provide: 'BACKEND_API_URL', useValue: backendApiUrl }
+          { provide: 'BACKEND_API_URL', useValue: backendApiUrl },
         ],
       });
+
       res.send(html);
     } catch (err) {
       console.error(`❌ SSR error for ${req.originalUrl}:`, err);
-      // In caso di errore, si può provare un fallback o restituire un 404
-      res.status(404).send('Pagina non trovata');
+      res.status(500).send('Errore interno del server');
     }
   });
-  
+
   return server;
 }
 
 async function run(): Promise<void> {
-  const port = process.env['PORT'] || 8080;
+  const port = Number(process.env['PORT']) || 8080;
   const server = await app();
   server.listen(port, () => {
-    console.log(`✅ Angular SSR multilingua avviato su http://localhost:${port}`);
+    console.log(`✅ SSR avviato su http://localhost:${port}`);
   });
 }
 

@@ -1,25 +1,31 @@
-/* To learn more about this file see: https://angular.io/config/tsconfig. */
 {
-  "extends": "./tsconfig.json", // Estende il tsconfig.json principale della root del tuo progetto
+  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "./out-tsc/server", // Output corretto per la compilazione del server
-    "target": "es2022",           // Target moderno
-    "module": "es2022",           // Tipo di modulo corretto per Node.js moderno e bundler
-    "types": [
-      "node"                      // Necessario per il contesto Node.js
-    ],
-    "moduleResolution": "node"    // Importante per la risoluzione dei moduli in Node.js
+    "outDir": "./out-tsc/server",
+    "target": "es2022",
+    "module": "es2022",
+    "types": ["node"],
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
   },
   "files": [
-    "server.ts",          // Il tuo server Express (che è nella root del progetto)
-    "src/main.server.ts"  // Il punto di ingresso dell'applicazione Angular per SSR (che è in src/)
+    "server.ts",
+    "src/main.server.ts",
+    "src/types/server-main.d.ts"
   ],
   "include": [
     "src/**/*.d.ts",
-    "src/**/*.ts"         // Include tutti i file TypeScript dalla cartella src
+    "src/**/*.ts",
+    "src/types/**/*.d.ts"
   ],
   "exclude": [
     "src/test.ts",
     "src/**/*.spec.ts"
-  ]
+  ],
+  "angularCompilerOptions": {
+    "entryModule": "./src/app/app.server.module#AppServerModule"
+  }
 }
