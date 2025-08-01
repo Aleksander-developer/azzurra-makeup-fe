@@ -1,4 +1,3 @@
-// server.ts
 import { APP_BASE_HREF } from '@angular/common';
 import { CommonEngine } from '@angular/ssr';
 import express from 'express';
@@ -52,6 +51,11 @@ export async function app(): Promise<express.Express> {
     res.sendFile(join(browserDistFolder, 'favicon.ico'));
   });
 
+  // Health check endpoint semplice per Cloud Run e debug
+  server.get('/healthz', (req, res) => {
+    res.status(200).send('OK');
+  });
+
   // Redirect dalla root a /it/ (lingua di default)
   server.get('/', (req, res) => {
     res.redirect(301, `/${defaultLocale}/`);
@@ -97,4 +101,5 @@ async function run(): Promise<void> {
   });
 }
 
+console.log('➡️ Avvio server...');
 run();
