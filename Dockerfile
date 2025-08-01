@@ -1,41 +1,32 @@
-# Stage 1: Build the Angular application
+# Stage 1: Build the Angular SSR application
 FROM node:20 AS builder
 
 WORKDIR /app
 
-# Copia package.json e package-lock.json per installare le dipendenze
-COPY package.json package-lock.json ./
+# Copia package.json e installa dipendenze
+COPY package*.json ./
+RUN npm ci
 
-# Pulisci la cache di npm (opzionale, ma può aiutare)
-RUN npm cache clean --force
-
-# Installa le dipendenze
-RUN npm install
-
-# Copia il resto dei file sorgente
+# Copia tutto il codice sorgente
 COPY . .
 
-# Costruisci l'app Angular con SSR e localizzazione
-RUN npx ng build --configuration=production --localize \
-  && npx ng run azzurra-makeup-fe-new:server:production
+# Compila app Angular con localizzazione e SSR
+RUN npx ng build --configuration=production --localize && \
+    npx ng run azzurra-makeup-fe-new:server:production
 
-# Stage 2: Runtime minimal con solo i file buildati e dipendenze prod
+# Stage 2: Serve app con Node.js
 FROM node:20
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# Copia i bundle compilati da builder
-COPY --from=builder /app/dist/server ./server
-COPY --from=builder /app/dist/browser ./browser
-
-# Copia package.json per eventuali dipendenze runtime
+# Copia i file compilati necessari
+COPY --from=builder /app/dist/browser /app/dist/browser
+COPY --from=builder /app/dist/server /app/dist/server
 COPY --from=builder /app/package.json ./
+COPY --from=builder /app/node_modules ./node_modules
 
-# Installa solo le dipendenze di produzione (non serve reinstallare tutto)
-RUN npm install --only=production
-
-# Espone la porta 8080 per l'app SSR
+# Espone la porta usata da Cloud Run
 EXPOSE 8080
 
-# Avvia il server SSR con Node.js
-CMD [ "node", "./server/server.mjs" ]
+# Comando per avviare il server SSR
+CMD ["node", "dist/server/main.js"]

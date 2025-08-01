@@ -1,5 +1,3 @@
-/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
-/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
@@ -7,9 +5,7 @@
     "types": []
   },
   "files": [
-    "src/main.ts",        // Entry point del browser
-    "src/main.server.ts", // AGGIUNTO: Entry point del server SSR (in src/)
-    "server.ts"           // AGGIUNTO: Il tuo server Express (nella root)
+    "src/main.ts"
   ],
   "include": [
     "src/**/*.d.ts"

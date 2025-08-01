@@ -6,57 +6,64 @@ import { join } from 'node:path';
 import { LOCALE_ID, enableProdMode } from '@angular/core';
 import '@angular/localize/init';
 
-// ✅ Importa environment senza errori
-let production = false;
-try {
-  const env = await import('./src/environments/environment');
-  // @ts-expect-error: TypeScript non riconosce .production, ma è presente
-  production = env.production ?? false;
-  if (production) {
-    enableProdMode();
+async function loadEnvironment(): Promise<boolean> {
+  let production = false;
+  try {
+    const envModule = await import('./src/environments/environment');
+    production = envModule.environment.production;
+    if (production) {
+      enableProdMode();
+    }
+  } catch (e) {
+    console.warn('⚠️ Ambiente di sviluppo: environment non caricato');
   }
-} catch (e) {
-  console.warn('⚠️ Ambiente di sviluppo: environment non caricato');
+  return production;
 }
 
 export async function app(): Promise<express.Express> {
+  const production = await loadEnvironment();
+
   const server = express();
 
-  // ✅ Import dinamico modulare con compatibilità .mjs
-
-  const AppServerModule = production
-    ? (await import('./server/main.mjs')).AppServerModule
-    : (await import('./src/main.server')).AppServerModule;
+  // Import del modulo server Angular
+  const AppServerModule = (await import('./src/main.server')).AppServerModule;
 
   const currentDir = process.cwd();
+
+  // ATTENZIONE: path coerente con angular.json
   const browserDistFolder = join(currentDir, 'dist/browser');
+
   const backendApiUrl = process.env['API_BACKEND_URL'] || 'http://localhost:3000';
 
+  // Lingue supportate
   const supportedLocales = ['it', 'en'];
   const defaultLocale = 'it';
 
   const commonEngine = new CommonEngine();
 
-  // Statici globali
-  server.use(express.static(browserDistFolder, { maxAge: '1y' }));
-
-  // Statici localizzati
+  // Serve i file statici per ogni lingua in /it e /en
   supportedLocales.forEach((locale) => {
     const localePath = join(browserDistFolder, locale);
     server.use(`/${locale}`, express.static(localePath, { maxAge: '1y' }));
   });
 
+  // Serve favicon dalla root del dist/browser
   server.get('/favicon.ico', (req, res) => {
     res.sendFile(join(browserDistFolder, 'favicon.ico'));
   });
 
+  // Redirect dalla root a /it/ (lingua di default)
   server.get('/', (req, res) => {
-    res.redirect(`/${defaultLocale}`);
+    res.redirect(301, `/${defaultLocale}/`);
   });
 
+  // SSR universale per tutte le altre rotte
   server.get('*', async (req, res) => {
     try {
-      const locale = req.url.startsWith('/en') ? 'en' : defaultLocale;
+      // Estrai lingua dalla URL; se non supportata, usa defaultLocale
+      const urlLocale = supportedLocales.find(locale => req.url.startsWith(`/${locale}`));
+      const locale = urlLocale || defaultLocale;
+
       const localePath = join(browserDistFolder, locale);
       const indexHtml = join(localePath, 'index.html');
 
@@ -72,7 +79,7 @@ export async function app(): Promise<express.Express> {
         ],
       });
 
-      res.send(html);
+      res.status(200).send(html);
     } catch (err) {
       console.error(`❌ SSR error for ${req.originalUrl}:`, err);
       res.status(500).send('Errore interno del server');

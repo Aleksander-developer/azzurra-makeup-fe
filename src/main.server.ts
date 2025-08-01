@@ -1,11 +1,2 @@
-import '@angular/localize/init';
-
-import { enableProdMode } from '@angular/core';
-import { environment } from './environments/environment';
-import { AppServerModule } from './app/app.module.server';
-
-if (environment.production) {
-  enableProdMode();
-}
-
-export { AppServerModule };
+// src/main.server.ts
+export { AppServerModule } from './app/app.module.server';
