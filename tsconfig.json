@@ -3,7 +3,7 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "baseUrl": "./", // Indispensabile per i percorsi relativi
+    "baseUrl": "./",
     "outDir": "./dist/out-tsc",
     "strict": true,
     "noImplicitOverride": true,
@@ -24,7 +24,6 @@
       "ES2022",
       "dom"
     ]
-    // RIMOSSO COMPLETAMENTE LA SEZIONE "paths"
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
