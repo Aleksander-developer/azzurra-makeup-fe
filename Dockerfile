@@ -24,7 +24,11 @@ FROM node:20
 WORKDIR /usr/src/app
 
 # Copia i bundle compilati
+# Il percorso di origine è /app/dist/server/
 COPY --from=builder /app/dist/server/ ./server 
+
+# Copia la cartella del browser buildata
+# Il percorso di origine è /app/dist/browser/
 COPY --from=builder /app/dist/browser/ ./browser 
 
 # Copia i file per il runtime
@@ -34,4 +38,5 @@ COPY --from=builder /app/node_modules ./node_modules/
 EXPOSE 8080
 
 # Comando per avviare l'applicazione
+# main.js è ora all'interno della cartella 'server' che è stata copiata
 CMD [ "node", "./server/main.js" ]
