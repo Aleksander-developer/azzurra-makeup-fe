@@ -5,12 +5,8 @@ import express from 'express';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { LOCALE_ID } from '@angular/core';
+import AppServerModule from 'src/main.server';
 
-// ***** CORREZIONE QUI: Importiamo AppServerModule all'inizio del file *****
-// L'importazione statica è il modo più robusto per il type-checker.
-import AppServerModule from './src/main.server';
-
-// The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {
   const server = express();
   const serverDistFolder = dirname(fileURLToPath(import.meta.url));
@@ -23,7 +19,7 @@ export function app(): express.Express {
   server.set('view engine', 'html');
   server.set('views', browserDistFolder);
 
-  // Serve i file statici per ogni lingua in /it e /en
+  // Serve i file statici per ogni lingua
   supportedLocales.forEach((locale) => {
     const localePath = join(browserDistFolder, locale);
     server.use(`/${locale}`, express.static(localePath, {
@@ -31,29 +27,27 @@ export function app(): express.Express {
     }));
   });
 
-  // Serve i file statici non localizzati (es. il favicon)
+  // Serve i file statici non localizzati
   server.get('*.*', express.static(browserDistFolder, {
     maxAge: '1y'
   }));
 
-  // All regular routes use the Angular engine
+  // Tutte le rotte regolari usano l'engine Angular
   server.get('*', (req, res, next) => {
-    const { protocol, originalUrl, baseUrl, headers } = req;
+    const { protocol, originalUrl, headers } = req;
     
-    // Controlla se la lingua è supportata nella URL
     const locale = supportedLocales.find(loc => originalUrl.startsWith(`/${loc}/`)) || defaultLocale;
     
-    // Percorso ai file compilati per la lingua specifica
     const localePath = join(browserDistFolder, locale);
     const indexHtml = join(localePath, 'index.html');
     
     commonEngine
       .render({
-        bootstrap: AppServerModule, // ✅ passaggio diretto del modulo
+        bootstrap: AppServerModule,
         documentFilePath: indexHtml,
         url: `${protocol}://${headers.host}${originalUrl}`,
-        publicPath: browserDistFolder,
-        providers: [{ provide: APP_BASE_HREF, useValue: baseUrl }],
+        publicPath: localePath,
+        providers: [{ provide: APP_BASE_HREF, useValue: `/${locale}/` }],
       })
       .then((html) => res.send(html))
       .catch((err) => next(err));

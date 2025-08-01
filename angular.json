@@ -5,6 +5,20 @@
   "projects": {
     "azzurra-makeup-fe": {
       "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": { "style": "scss" },
+        "@schematics/angular:directive": { "standalone": false },
+        "@schematics/angular:pipe": { "standalone": false }
+      },
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "i18n": {
+        "sourceLocale": "it",
+        "locales": {
+          "en": "src/locale/messages.en.xlf"
+        }
+      },
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:application",
@@ -14,10 +28,15 @@
             "browser": "src/main.ts",
             "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
-            "assets": [ "src/assets" ],
-            "styles": ["src/styles.scss"],
-            "server": "server.ts",
-            "localize": ["it", "en"] 
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              { "glob": "favicon.ico", "input": "src", "output": "/" },
+              "src/assets"
+            ],
+            "styles": [
+              "src/styles.scss"
+            ],
+            "localize": true
           },
           "configurations": {
             "production": {
@@ -25,20 +44,107 @@
               "outputHashing": "all",
               "sourceMap": false,
               "namedChunks": false,
-              "localize": ["it", "en"],
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
               "budgets": [
-                { "type": "initial", "maximumWarning": "500kb", "maximumError": "1mb" },
-                { "type": "anyComponentStyle", "maximumWarning": "2kb", "maximumError": "4kb" }
+                { "type": "initial", "maximumWarning": "2mb", "maximumError": "5mb" },
+                { "type": "anyComponentStyle", "maximumWarning": "10kb", "maximumError": "20kb" }
               ]
             },
-            "development": {
-              "localize": ["it"] 
+            "it": {
+              "localize": ["it"],
+              "outputPath": "dist/browser/it",
+              "i18nFile": "src/locale/messages.it.xlf",
+              "i18nFormat": "xlf",
+              "i18nLocale": "it",
+              "i18nMissingTranslation": "warning"
+            },
+            "en": {
+              "localize": ["en"],
+              "outputPath": "dist/browser/en",
+              "i18nFile": "src/locale/messages.en.xlf",
+              "i18nFormat": "xlf",
+              "i18nLocale": "en",
+              "i18nMissingTranslation": "warning"
             }
           },
           "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "azzurra-makeup-fe:build:production"
+            },
+            "development": {
+              "buildTarget": "azzurra-makeup-fe:build:development"
+            },
+            "it": {
+              "browserTarget": "azzurra-makeup-fe:build:it"
+            },
+            "en": {
+              "browserTarget": "azzurra-makeup-fe:build:en"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "azzurra-makeup-fe:build"
+          }
+        },
+        "server": {
+          "builder": "@angular-devkit/build-angular:server",
+          "options": {
+            "outputPath": "dist/server",
+            "main": "server.ts",
+            "tsConfig": "tsconfig.server.json"
+          },
+          "configurations": {
+            "production": {
+              "outputPath": "dist/server"
+            },
+            "it": {
+              "outputPath": "dist/server/it"
+            },
+            "en": {
+              "outputPath": "dist/server/en"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "src/test.ts",
+            "polyfills": ["zone.js"],
+            "tsConfig": "tsconfig.spec.json",
+            "karmaConfig": "karma.conf.js",
+            "assets": [
+              { "glob": "favicon.ico", "input": "src", "output": "/" },
+              "src/assets"
+            ],
+            "styles": [
+              "src/styles.scss"
+            ],
+            "scripts": []
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
+          }
         }
       }
     }
   },
-  "cli": { "analytics": false }
+  "defaultProject": "azzurra-makeup-fe",
+  "cli": {
+    "analytics": false
+  }
 }
