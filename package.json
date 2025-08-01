@@ -10,7 +10,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "prebuild:ssr": "rm -rf dist/",
-    "build:ssr": "ng build --configuration=production --localize && ng run azzurra-makeup-fe:server:production",
+    "build:ssr": "ng build --configuration=production --localize && ng run azzurra-makeup-fe-new:server:production",
     "serve:ssr": "node dist/server/main.js",
     "serve:ssr:dev": "ng serve --hmr --open"
   },

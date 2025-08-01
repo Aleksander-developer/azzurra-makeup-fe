@@ -16,7 +16,7 @@ RUN npm install
 COPY . .
 
 # Esegui la build SSR
-RUN npx ng build --configuration=production --localize && npx ng run azzurra-makeup-fe-new:server:production
+RUN npm run build:ssr
 
 # Stage 2: Serve the application with a lightweight Node.js server
 FROM node:20
