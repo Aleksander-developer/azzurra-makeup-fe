@@ -1,20 +1,20 @@
-# FASE 1: "Builder"
-FROM node:20 AS builder
+# FASE 1: "Builder" - Usiamo l'immagine Alpine
+FROM node:20-alpine AS builder
+
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
 RUN npm run build:ssr
 
-# FASE 2: "Runner"
-FROM node:20
+# FASE 2: "Runner" - Usiamo l'immagine Alpine anche per la produzione
+FROM node:20-alpine
+
 WORKDIR /usr/src/app
 COPY --from=builder /app/package*.json ./
 RUN npm install --only=production
 COPY --from=builder /app/dist ./dist
 EXPOSE 8080
 
-# ---> MODIFICA CHIAVE <---
-# Invece di usare "node" direttamente, usiamo lo script "start" di npm.
-# Questo è il metodo standard e più robusto per avviare app Node.js.
+# Usiamo npm start come comando di avvio standard
 CMD [ "npm", "start" ]
