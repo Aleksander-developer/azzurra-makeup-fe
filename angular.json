@@ -55,6 +55,11 @@
                 { "type": "anyComponentStyle", "maximumWarning": "10kb", "maximumError": "20kb" }
               ]
             },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            },
             "it": {
               "localize": ["it"],
               "outputPath": "dist/browser/it",
@@ -143,7 +148,6 @@
       }
     }
   },
-  "defaultProject": "azzurra-makeup-fe",
   "cli": {
     "analytics": false
   }
