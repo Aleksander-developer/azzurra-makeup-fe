@@ -1,0 +1,9 @@
+version: 1.0
+build:
+  runtime: dockerfile
+  dockerfile: Dockerfile
+run:
+  port: 8080
+  env:
+    - name: API_BACKEND_URL
+      value: "https://3npmcryhp6.eu-central-1.awsapprunner.com" # <-- L'URL del tuo backend
