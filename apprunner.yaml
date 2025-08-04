@@ -1,0 +1,12 @@
+version: 1.0
+build:
+  # Dice ad App Runner di usare il Dockerfile per la build
+  runtime: dockerfile
+  dockerfile: Dockerfile
+run:
+  # Dice al container su quale porta ascoltare
+  port: 8080
+  # Definisce le variabili d'ambiente necessarie
+  env:
+    - name: API_BACKEND_URL
+      value: "https://3npmcryhp6.eu-central-1.awsapprunner.com" # <-- INCOLLA QUI L'URL CORRETTO DEL TUO BACKEND
