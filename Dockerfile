@@ -16,5 +16,9 @@ RUN npm install --only=production
 COPY --from=builder /app/dist ./dist
 EXPOSE 8080
 
+RUN ls -la /usr/src/app/dist/server && cat /usr/src/app/dist/server/main.js || echo "main.js non trovato o vuoto"
+
+
+
 # Usiamo npm start come comando di avvio standard
 CMD [ "npm", "start" ]

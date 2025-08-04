@@ -1,0 +1,32 @@
+{
+  "family": "azzurra-frontend-task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::033504886521:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "azzurra-frontend-container",
+      "image": "033504886521.dkr.ecr.eu-central-1.amazonaws.com/azzurra-makeup-frontend:latest",
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "essential": true,
+      "environment": [
+        { "name": "NODE_ENV", "value": "production" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/azzurra-frontend",
+          "awslogs-region": "eu-central-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}
