@@ -1,6 +1,7 @@
 version: 1.0
-run:
-  port: 8080
-  env:
-    - name: API_BACKEND_URL
-      value: "https://3npmcryhp6.eu-central-1.awsapprunner.com"
+runtime: nodejs20
+build:
+  commands:
+    - npm install
+    - npm run build:ssr
+startCommand: node dist/server/main.js
